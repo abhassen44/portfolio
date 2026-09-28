@@ -14,6 +14,7 @@ import {
   Maximize2,
   AlertCircle
 } from "lucide-react";
+import { FormattedMarkdown } from "./FormattedMarkdown";
 
 export interface ChatMessage {
   id: string;
@@ -21,6 +22,49 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   modelUsed?: string;
+}
+
+// Resilient client-side knowledge generator if backend is unavailable or deployed statically
+function getClientPortfolioReply(userQuery: string): string {
+  const query = userQuery.toLowerCase();
+
+  if (query.includes("langgraph") || query.includes("agent")) {
+    return "### Experience with LangGraph & Multi-Agent Systems\n\nAbhas has designed and implemented multi-agent architectures using **LangGraph** and **LangChain**:\n- **Multi-Agent Code Evaluation**: Built autonomous loops incorporating AST validation, lint verification, and tree-sitter context parsing for automated code review.\n- **Orchestration**: Coordinated stateful graphs with conditional branching, error-recovery nodes, and memory persistence.\n- **Production Impact**: Reduced review turnaround time by 64% and improved automated test coverage generation.";
+  }
+
+  if (query.includes("rag") || query.includes("retrieval") || query.includes("vector") || query.includes("qdrant")) {
+    return "### RAG & Semantic Retrieval Architecture\n\nAbhas's RAG system architecture:\n- **Hybrid Dense & Sparse Search**: Combines **Qdrant** vector indexing with BM25 sparse keyword ranking.\n- **Cross-Encoder Reranking**: Applies cross-encoder reranking to achieve sub-50ms query latency with high top-k precision over 2.4M technical documents.\n- **Document Ingestion**: Multi-document ingestion pipeline querying 1000+ pages of PDFs, cutting retrieval turnaround time by 70%.";
+  }
+
+  if (query.includes("coding platform") || query.includes("docker") || query.includes("monaco") || query.includes("intelligent")) {
+    return "### Intelligent AI Coding Platform\n\n- **Isolated Dev Workspaces**: Containerized execution environments using **Docker** for sandboxed code evaluation across Python, C++, and JavaScript.\n- **Monaco Editor Integration**: Interactive browser-based code editing with syntax highlighting and live diagnostics.\n- **Background Pipeline**: Asynchronous background workers using **Celery** and vector context retrieval via **Qdrant**.";
+  }
+
+  if (query.includes("drawsync") || query.includes("canvas") || query.includes("whiteboard")) {
+    return "### DrawSync — Collaborative Whiteboard\n\n- **Real-Time Synchronization**: Built with **WebSockets** and **PostgreSQL** for multi-user low-latency vector canvas drawing.\n- **AI Assistance**: Integrated Gemini AI for real-time diagram analysis and shape completion suggestions.";
+  }
+
+  if (query.includes("xai") || query.includes("explainable") || query.includes("shap") || query.includes("lime")) {
+    return "### Explainable AI (XAI) Project\n\n- Developed machine learning and deep learning pipelines (CNN-LSTM, SVM, DNN) with **SHAP** (SHapley Additive exPlanations) and **LIME** algorithms for real-time model interpretability and transparency.";
+  }
+
+  if (query.includes("leetcode") || query.includes("algorithm") || query.includes("dsa") || query.includes("problem")) {
+    return "### LeetCode & Problem Solving\n\n- **450+ Problems Solved**: Extensive practice across Dynamic Programming, Graph algorithms, Trees, and Sliding Window techniques.\n- **Profile**: [leetcode.com/abhassen44](https://leetcode.com/abhassen44).\n- Strong foundation in algorithmic complexity, memory profiling, and C++ STL.";
+  }
+
+  if (query.includes("skill") || query.includes("tech") || query.includes("stack") || query.includes("language")) {
+    return "### Technical Competencies\n\n- **Languages**: Python, C++, C, TypeScript, JavaScript, Java.\n- **AI / ML**: LangGraph, LangChain, RAG Pipelines, Qdrant, TensorFlow, Scikit-learn, SHAP/LIME.\n- **Full-Stack**: React, Next.js, FastAPI, Node.js, Express.js, Tailwind CSS, Three.js, GSAP.\n- **Infrastructure**: Docker, Kubernetes, PostgreSQL, MongoDB Atlas, Redis Streams, Neo4j, AWS.";
+  }
+
+  if (query.includes("education") || query.includes("college") || query.includes("university") || query.includes("degree") || query.includes("iiit")) {
+    return "### Academic Background\n\n- **Institution**: Indian Institute of Information Technology, Guwahati (IIITG)\n- **Degree**: B.Tech in Computer Science & Engineering (2023 – 2027)\n- **CGPA**: 7.63\n- **Fellowship**: Buildspace Season 5 Fellow";
+  }
+
+  if (query.includes("contact") || query.includes("email") || query.includes("linkedin") || query.includes("resume") || query.includes("phone")) {
+    return "### Contact & Verified Links\n\n- **Email**: [abhassen44@gmail.com](mailto:abhassen44@gmail.com)\n- **LinkedIn**: [linkedin.com/in/abhas-sen-1a0862282](https://www.linkedin.com/in/abhas-sen-1a0862282/)\n- **GitHub**: [github.com/abhassen44](https://github.com/abhassen44)\n- **Resume**: [View on Google Drive](https://drive.google.com/file/d/1989kYQ8f7JAeh13pbDGS9icrlevHuHmB/view?usp=sharing)\n- **Phone**: +91 9826505141";
+  }
+
+  return "Abhas Sen is a Computer Science & AI Engineer at IIIT Guwahati specializing in full-stack architecture, agent orchestration (LangGraph), and scalable RAG pipelines with Qdrant and Docker. Feel free to ask about his system architecture, projects, or problem-solving experience!";
 }
 
 export const GeminiChatModal: React.FC = () => {
@@ -82,29 +126,48 @@ export const GeminiChatModal: React.FC = () => {
         taskComplexity: complexity,
       };
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let replyText = "";
+      let modelUsed = "gemini-3.5-flash";
 
-      const data = await response.json();
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to receive response from Gemini.");
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data && data.text) {
+            replyText = data.text;
+            modelUsed = data.modelUsed || modelUsed;
+          } else {
+            replyText = getClientPortfolioReply(userText);
+            modelUsed = "portfolio-engine";
+          }
+        } else {
+          // Non-JSON response (e.g., static server preview or HTML 404 in production)
+          replyText = getClientPortfolioReply(userText);
+          modelUsed = "portfolio-engine";
+        }
+      } catch {
+        // Fetch failed due to network / CORS / offline
+        replyText = getClientPortfolioReply(userText);
+        modelUsed = "portfolio-engine";
       }
 
       const botMsg: ChatMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        text: data.text,
+        text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        modelUsed: data.modelUsed,
+        modelUsed,
       };
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred while calling the Gemini API.");
+      setErrorMsg(err?.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -268,7 +331,11 @@ export const GeminiChatModal: React.FC = () => {
                         : "bg-white dark:bg-[#0D1711] border border-[#DDE8E1] dark:border-[#1B3022] text-[#111827] dark:text-[#E5E7EB]"
                     }`}
                   >
-                    <div className="whitespace-pre-wrap font-sans">{m.text}</div>
+                    {isUser ? (
+                      <div className="whitespace-pre-wrap font-sans">{m.text}</div>
+                    ) : (
+                      <FormattedMarkdown content={m.text} />
+                    )}
                   </div>
                 </div>
               );
