@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { portfolioConfig } from "../../config/portfolio";
 import { useTheme } from "../../hooks/useTheme";
-import { Sun, Moon, Menu, X, Github, ArrowUpRight } from "lucide-react";
+import { Sun, Moon, Menu, X, Github, ArrowUpRight, Gamepad2 } from "lucide-react";
 
 interface NavbarProps {
   onNavigate: (id: string) => void;
   activeSection: string;
+  onOpenGame?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection, onOpenGame }) => {
   const { theme, isDark, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -90,6 +91,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* 3D Vector Runner Game Button */}
+            {onOpenGame && (
+              <button
+                onClick={onOpenGame}
+                aria-label="Launch 3D Vector Runner Game"
+                title="Play 3D Vector Runner (RAG Pipeline Defender)"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 border border-[#166534] dark:border-[#22C55E] bg-[#166534]/10 dark:bg-[#22C55E]/10 text-[#166534] dark:text-[#22C55E] hover:bg-[#166534] hover:text-white dark:hover:bg-[#22C55E] dark:hover:text-black transition-all cursor-pointer font-mono text-xs"
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline font-bold">Play Game</span>
+              </button>
+            )}
+
             {/* GitHub Profile Icon Link */}
             <a
               href={portfolioConfig.social.github}

@@ -2,16 +2,22 @@ import React, { useEffect, useRef } from "react";
 import { portfolioConfig } from "../../config/portfolio";
 import { HeroScene } from "../3d/HeroScene";
 import { useTheme } from "../../hooks/useTheme";
-import { ArrowDown, Github, Linkedin, ExternalLink, Code2, FileText } from "lucide-react";
+import { ArrowDown, Github, Linkedin, ExternalLink, Code2, FileText, Gamepad2 } from "lucide-react";
 import gsap from "gsap";
 
 interface HeroProps {
   onExploreProjects: () => void;
   onExploreAbout: () => void;
   onOpenResume?: () => void;
+  onOpenGame?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExploreProjects, onExploreAbout, onOpenResume }) => {
+export const Hero: React.FC<HeroProps> = ({
+  onExploreProjects,
+  onExploreAbout,
+  onOpenResume,
+  onOpenGame,
+}) => {
   const { isDark } = useTheme();
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -173,6 +179,17 @@ export const Hero: React.FC<HeroProps> = ({ onExploreProjects, onExploreAbout, o
                 <Code2 className="w-4 h-4 text-[#166534] dark:text-[#22C55E]" />
                 <span>LeetCode</span>
               </a>
+
+              {onOpenGame && (
+                <button
+                  onClick={onOpenGame}
+                  className="inline-flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-mono font-semibold uppercase tracking-wider text-[#166534] dark:text-[#22C55E] bg-[#166534]/10 dark:bg-[#22C55E]/10 border border-[#166534] dark:border-[#22C55E] hover:bg-[#166534] hover:text-white dark:hover:bg-[#22C55E] dark:hover:text-black transition-all cursor-pointer"
+                  title="Launch 3D Vector Runner (Qdrant RAG Simulation)"
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  <span>Play Vector Runner</span>
+                </button>
+              )}
             </div>
 
             {/* Quick Technical Summary Strip */}

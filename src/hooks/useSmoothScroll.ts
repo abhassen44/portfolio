@@ -5,6 +5,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+let globalLenis: Lenis | null = null;
+
+export function getLenisInstance(): Lenis | null {
+  return globalLenis;
+}
+
 export function useSmoothScroll() {
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -22,6 +28,7 @@ export function useSmoothScroll() {
       infinite: false,
     });
     lenisRef.current = lenis;
+    globalLenis = lenis;
 
     // Synchronize Lenis with GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
@@ -37,6 +44,7 @@ export function useSmoothScroll() {
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       lenisRef.current = null;
+      globalLenis = null;
     };
   }, []);
 

@@ -12,11 +12,13 @@ import { GitHubActivity } from "./components/sections/GitHubActivity";
 import { Contact } from "./components/sections/Contact";
 import { Footer } from "./components/ui/Footer";
 import { GeminiChatModal } from "./components/chat/GeminiChatModal";
+import { VectorGameModal } from "./components/game/VectorGameModal";
 import { FadeInSection } from "./components/ui/FadeInSection";
 
 function PortfolioContent() {
   const { scrollTo } = useSmoothScroll();
   const [activeSection, setActiveSection] = useState("home");
+  const [isGameOpen, setIsGameOpen] = useState(false);
 
   useEffect(() => {
     const sectionIds = ["home", "about", "skills", "projects", "experience", "education", "contact"];
@@ -42,6 +44,7 @@ function PortfolioContent() {
       <Navbar
         onNavigate={(hash) => scrollTo(hash)}
         activeSection={activeSection}
+        onOpenGame={() => setIsGameOpen(true)}
       />
 
       <main>
@@ -49,6 +52,7 @@ function PortfolioContent() {
         <Hero
           onExploreProjects={() => scrollTo("#projects")}
           onExploreAbout={() => scrollTo("#about")}
+          onOpenGame={() => setIsGameOpen(true)}
         />
 
         {/* Static Personal / About Section */}
@@ -92,6 +96,12 @@ function PortfolioContent() {
 
       {/* Floating Gemini Chatbot */}
       <GeminiChatModal />
+
+      {/* 3D Vector Runner Game Modal */}
+      <VectorGameModal
+        isOpen={isGameOpen}
+        onClose={() => setIsGameOpen(false)}
+      />
     </div>
   );
 }

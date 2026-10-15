@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ExternalLink, Download, FileText, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { portfolioConfig } from "../../config/portfolio";
 
@@ -31,15 +32,15 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.2, 2.0));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.2, 0.6));
   const handleResetZoom = () => setZoom(1);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-sm animate-fadeIn"
       onClick={onClose}
     >
       <div
@@ -196,6 +197,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

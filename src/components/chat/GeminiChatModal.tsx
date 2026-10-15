@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { FormattedMarkdown } from "./FormattedMarkdown";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 
 export interface ChatMessage {
   id: string;
@@ -82,6 +83,8 @@ export const GeminiChatModal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [complexity, setComplexity] = useState<"general" | "fast" | "complex">("general");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useModalScrollLock(isOpen);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -293,7 +296,10 @@ export const GeminiChatModal: React.FC = () => {
           </div>
 
           {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F7FAF8] dark:bg-[#050805]">
+          <div
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F7FAF8] dark:bg-[#050805] overscroll-contain"
+            data-lenis-prevent
+          >
             {messages.map((m) => {
               const isUser = m.role === "user";
               return (

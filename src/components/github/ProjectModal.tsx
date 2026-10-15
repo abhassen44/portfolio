@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { GitHubRepo } from "../../lib/github/types";
 import { fetchRepoReadme } from "../../lib/github/api";
 import { formatRelativeDate, getLanguageColor } from "../../lib/github/transform";
@@ -17,6 +18,7 @@ import {
   Tag,
   BookOpen
 } from "lucide-react";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 
 interface ProjectModalProps {
   repo: GitHubRepo | null;
@@ -27,6 +29,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
   const [readme, setReadme] = useState<string | null>(null);
   const [loadingReadme, setLoadingReadme] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useModalScrollLock(Boolean(repo));
 
   useEffect(() => {
     if (!repo) {
@@ -54,7 +58,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
     };
   }, [repo, onClose]);
 
-  if (!repo) return null;
+  if (!repo || typeof document === "undefined") return null;
 
   const handleCopyClone = () => {
     navigator.clipboard.writeText(`git clone ${repo.html_url}.git`);
@@ -62,9 +66,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -73,7 +77,10 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Modal Container (Solid colors, no gradients) */}
-      <div className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-[#0D1711] border border-[#DDE8E1] dark:border-[#1B3022] shadow-2xl overflow-hidden">
+      <div
+        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-[#0D1711] border border-[#DDE8E1] dark:border-[#1B3022] shadow-2xl overflow-hidden"
+        data-lenis-prevent
+      >
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#DDE8E1] dark:border-[#1B3022] bg-[#F7FAF8] dark:bg-[#050805]">
           <div className="flex items-center gap-3">
@@ -114,7 +121,10 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div
+          className="flex-1 overflow-y-auto p-6 space-y-6 overscroll-contain"
+          data-lenis-prevent
+        >
           {/* Description */}
           <div>
             <div className="text-xs font-mono uppercase tracking-wider text-[#4B5563] dark:text-[#A7B0AA] mb-1">
@@ -270,6 +280,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ repo, onClose }) => 
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
